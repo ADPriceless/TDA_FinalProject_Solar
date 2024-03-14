@@ -24,9 +24,18 @@ def write_img_and_mask_names_to_csv(
             img_or_mask = 0
 
 
+def write_annotation_files(directories: list[Path]):
+    """Writes the annotation files for the given directories."""
+    for directory in directories:
+        annotation_path = directory.joinpath('annotation.csv')
+        if not annotation_path.exists():
+            write_img_and_mask_names_to_csv(
+                directory,
+                annotation_path
+            )
+
+
 if __name__ == '__main__':
-    # This is used for checking the CSV file manually
-    write_img_and_mask_names_to_csv(
-        Path('data/Hou/PV01_Rooftop_Brick'),
-        Path('test/annotation.csv')
-    )
+    root = Path('data/Hou')
+    directories = list(root.iterdir())
+    write_annotation_files(directories)
