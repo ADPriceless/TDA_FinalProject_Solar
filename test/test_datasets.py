@@ -64,6 +64,14 @@ def test_mask_is_binary(hou_ds_rand_subset):
         assert mask.min() == 0
 
 
+def test_pixel_value_range(hou_ds_rand_subset):
+    for sample in range(len(hou_ds_rand_subset)):
+        img, _ = hou_ds_rand_subset[sample]
+        # Pixel values in `img` should be in the range [0, 255]
+        assert img.min() >= 0
+        assert img.max() <= 255
+
+
 # ---------------------------------------------------------------------------
 # Fixtures
 @pytest.fixture
