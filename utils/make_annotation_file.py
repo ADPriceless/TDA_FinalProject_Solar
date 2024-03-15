@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 def write_img_and_mask_names_to_csv(
-        root_dir: Path, csv_file_path: Path, file_ext: str = 'bmp'
+        root_dir: Path, csv_file_path: Path, file_ext: str = 'png'
 ) -> None:
     """Writes the names of the images and masks to a CSV file for use in
     data retrieval."""
