@@ -9,7 +9,7 @@ from torch.utils.data import Dataset
 from torchvision.io import read_image
 
 
-class HouDataset(Dataset):
+class ImgAndMaskDataset(Dataset):
     """Class representing the Hou dataset. """
     def __init__(
         self,
@@ -18,6 +18,8 @@ class HouDataset(Dataset):
         transform=None,
         target_transform=None
     ):
+        if img_dir.is_file():
+            raise ValueError(f'img_dir must be a directory, not a file: {img_dir}')
         self.df_img_mask = pd.read_csv(annotations_file, names=['img', 'mask'])
         self.img_dir = img_dir
         self.transform = transform

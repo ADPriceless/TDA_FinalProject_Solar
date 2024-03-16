@@ -16,16 +16,9 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from preprocess.datasets import HouDataset
+from global_variables import DIRS_UNDER_TEST, DS_SUBSET_LENGTHS, DATA_DIR
+from preprocess.datasets import ImgAndMaskDataset
 from utils.make_annotation_file import write_annotation_files
-
-
-# ---------------------------------------------------------------------------
-# Global variables
-DIRS_UNDER_TEST = list(Path('data/Hou').iterdir())
-DIR_LENGTHS = (138, 413, 94, 859, 117, 352, 119, 625, 236)
-DS_SUBSET_LENGTHS = \
-    dict(zip([dir_.parts[-1] for dir_ in DIRS_UNDER_TEST], DIR_LENGTHS))
 
 
 # ---------------------------------------------------------------------------
@@ -72,6 +65,21 @@ def test_pixel_value_range(hou_ds_rand_subset):
         assert img.max() <= 255
 
 
+def test_ds_raises_if_img_dir_is_file():
+    annotation_file = DATA_DIR.joinpath('annotation.csv')
+    write_annotation_files([DATA_DIR])
+    with pytest.raises(ValueError):
+        ImgAndMaskDataset(annotation_file, annotation_file)
+
+
+def test_ds_raises_if_annotation_file_not_csv():
+    annotation_file = DATA_DIR.joinpath('annotation.txt')
+    _create_file(annotation_file)
+    with pytest.raises(ValueError):
+        ImgAndMaskDataset(DATA_DIR, annotation_file)
+    _cleanup_txt_files()
+
+
 # ---------------------------------------------------------------------------
 # Fixtures
 @pytest.fixture
@@ -81,7 +89,7 @@ def hou_ds_brick():
     ds_dir = Path('data/Hou/PV01_Rooftop_Brick')
     annotation_file = ds_dir.joinpath('annotation.csv')
     write_annotation_files([ds_dir])
-    return HouDataset(annotation_file, ds_dir)
+    return ImgAndMaskDataset(annotation_file, ds_dir)
 
 
 @pytest.fixture
@@ -91,7 +99,7 @@ def hou_ds_rand_subset():
     ds_dir = np.random.choice(DIRS_UNDER_TEST)
     annotation_file = ds_dir.joinpath('annotation.csv')
     write_annotation_files([ds_dir])
-    return HouDataset(annotation_file, ds_dir)
+    return ImgAndMaskDataset(annotation_file, ds_dir)
 
 
 @pytest.fixture(scope='module', autouse=True)
@@ -104,3 +112,14 @@ def _cleanup_dirs_ut():
     for dir_ in DIRS_UNDER_TEST:
         if dir_.joinpath('annotation.csv').exists():
             dir_.joinpath('annotation.csv').unlink()
+
+
+def _create_file(path: Path):
+    with open(path, 'w') as f:
+        f.write('test')
+
+
+def _cleanup_txt_files():
+    for dir_ in DIRS_UNDER_TEST:
+        if dir_.joinpath('annotation.txt').exists():
+            dir_.joinpath('annotation.txt').unlink()

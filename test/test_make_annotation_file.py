@@ -9,6 +9,7 @@ from pathlib import Path
 
 import pytest
 
+from global_variables import DIRS_UNDER_TEST, DATA_DIR
 from utils.make_annotation_file import (
     write_img_and_mask_names_to_csv,
     write_annotation_files
@@ -17,9 +18,7 @@ from utils.make_annotation_file import (
 
 # ---------------------------------------------------------------------------
 # Global variables
-DATA_DIR = Path('data/Hou/PV01_Rooftop_Brick')
 CSV_PATH = Path('test/annotation.csv')
-DIRS_UNDER_TEST = list(Path('data/Hou').iterdir())
 
 
 # ---------------------------------------------------------------------------
