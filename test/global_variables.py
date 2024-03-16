@@ -2,8 +2,10 @@
 
 from pathlib import Path
 
+ANNOTATION_PATH = Path('test/annotation.csv')
 
-DATA_DIR = Path('data/Hou/PV01_Rooftop_Brick')
+ROOT_HOU = Path('data/Hou')
+HOU_BRICK_DIR = Path('data/Hou/PV01_Rooftop_Brick')
 
 DIRS_UNDER_TEST = [p for p in Path('data/Hou').iterdir() if p.is_dir()]
 
@@ -14,8 +16,8 @@ DS_SUBSET_LENGTHS = \
 
 if __name__ == '__main__':
     # print all variables
-    print('DATA_DIR:')
-    print(DATA_DIR)
+    print('HOU_BRICK_DIR:')
+    print(HOU_BRICK_DIR)
 
     print('DIRS_UNDER_TEST:')
     print('\n'.join([str(p) for p in DIRS_UNDER_TEST]))

@@ -6,36 +6,56 @@ import csv
 from pathlib import Path
 
 
-def write_img_and_mask_names_to_csv(
-        root_dir: Path, csv_file_path: Path, file_ext: str = 'png'
+def create_annotation_files_hou(
+        annotation_path: Path, root_dir: Path,
+        exclude_dirs: list[Path] = None, file_ext: str = 'png'
 ) -> None:
-    """Writes the names of the images and masks to a CSV file for use in
-    data retrieval."""
-    img_or_mask = 0
-    for filename in root_dir.glob(f'*.{file_ext}'):
-        if img_or_mask == 0:
-            img_file = filename.name
-            img_or_mask = 1
-        else:
-            # write the `img_file` and `filename` (mask file) to csv
-            with open(csv_file_path, 'a', newline='', encoding='utf-8') as csv_file:
-                writer = csv.writer(csv_file)
-                writer.writerow([img_file, filename.name])
-            img_or_mask = 0
-
-
-def write_annotation_files(directories: list[Path]):
-    """Writes the annotation files for the given directories."""
-    for directory in directories:
-        annotation_path = directory.joinpath('annotation.csv')
-        if not annotation_path.exists():
-            write_img_and_mask_names_to_csv(
-                directory,
+    """Writes the paths of the images and masks, relative to 
+    `root_dir`, to a CSV file."""
+    if annotation_path.exists():
+        return
+    filepath_generator = root_dir.glob(f'**/*.{file_ext}')
+    while True:
+        try:
+            img_filepath, mask_filepath = get_img_and_mask_filepaths(filepath_generator)
+            # Prevent files in excluded directories from being added to
+            # annotation.csv
+            if exclude_dirs is not None:
+                if any((
+                    path_excluded(img_filepath, exclude_dirs),
+                    path_excluded(mask_filepath, exclude_dirs),
+                )):
+                    continue
+            img_filepath.relative_to(root_dir)
+            write_path_of_img_and_mask_to_csv(
+                img_filepath.relative_to(root_dir),
+                mask_filepath.relative_to(root_dir),
                 annotation_path
             )
+        except StopIteration:
+            break
 
 
-if __name__ == '__main__':
-    root = Path('data/Hou')
-    directories = list(root.iterdir())
-    write_annotation_files(directories)
+def get_img_and_mask_filepaths(generator) -> tuple[Path, Path]:
+    """Returns a tuple containing the image and mask filepaths."""
+    img_filepath = next(generator)
+    mask_filepath = next(generator)
+    return img_filepath, mask_filepath
+
+
+def path_excluded(filepath: Path, exclude_dirs: list[Path]) -> bool:
+    """Returns True if the given filepath is in one of the given directories."""
+    for directory in exclude_dirs:
+        if filepath.is_relative_to(directory):
+            return True
+    return False
+
+
+def write_path_of_img_and_mask_to_csv(
+    img_filepath: Path, mask_filepath: Path, csv_filepath: Path
+) -> None:
+    """Write the paths of the images and masks, relative to 
+    `root_dir`, to a CSV file."""
+    with open(csv_filepath, 'a', newline='', encoding='utf-8') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow([img_filepath, mask_filepath])

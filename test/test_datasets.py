@@ -16,9 +16,11 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from global_variables import DIRS_UNDER_TEST, DS_SUBSET_LENGTHS, DATA_DIR
+from global_variables import (
+    ANNOTATION_PATH, DIRS_UNDER_TEST, DS_SUBSET_LENGTHS, HOU_BRICK_DIR
+)
 from preprocess.datasets import ImgAndMaskDataset
-from utils.make_annotation_file import write_annotation_files
+from utils.make_annotation_file import create_annotation_files_hou
 
 
 # ---------------------------------------------------------------------------
@@ -66,17 +68,16 @@ def test_pixel_value_range(hou_ds_rand_subset):
 
 
 def test_ds_raises_if_img_dir_is_file():
-    annotation_file = DATA_DIR.joinpath('annotation.csv')
-    write_annotation_files([DATA_DIR])
+    create_annotation_files_hou(ANNOTATION_PATH, HOU_BRICK_DIR)
     with pytest.raises(ValueError):
-        ImgAndMaskDataset(annotation_file, annotation_file)
+        ImgAndMaskDataset(ANNOTATION_PATH, ANNOTATION_PATH)
 
 
 def test_ds_raises_if_annotation_file_not_csv():
-    annotation_file = DATA_DIR.joinpath('annotation.txt')
+    annotation_file = HOU_BRICK_DIR.joinpath('annotation.txt')
     _create_file(annotation_file)
     with pytest.raises(ValueError):
-        ImgAndMaskDataset(DATA_DIR, annotation_file)
+        ImgAndMaskDataset(HOU_BRICK_DIR, annotation_file)
     _cleanup_txt_files()
 
 
@@ -87,9 +88,8 @@ def hou_ds_brick():
     """Useful for an initial dataset to test due to its
     small size."""
     ds_dir = Path('data/Hou/PV01_Rooftop_Brick')
-    annotation_file = ds_dir.joinpath('annotation.csv')
-    write_annotation_files([ds_dir])
-    return ImgAndMaskDataset(annotation_file, ds_dir)
+    create_annotation_files_hou(ANNOTATION_PATH, HOU_BRICK_DIR)
+    return ImgAndMaskDataset(ANNOTATION_PATH, ds_dir)
 
 
 @pytest.fixture
@@ -97,15 +97,20 @@ def hou_ds_rand_subset():
     """Useful to gain more coverage of the whole dataset
     over multiple test runs, without taking too long."""
     ds_dir = np.random.choice(DIRS_UNDER_TEST)
-    annotation_file = ds_dir.joinpath('annotation.csv')
-    write_annotation_files([ds_dir])
-    return ImgAndMaskDataset(annotation_file, ds_dir)
+    create_annotation_files_hou(ANNOTATION_PATH, ds_dir)
+    return ImgAndMaskDataset(ANNOTATION_PATH, ds_dir)
 
 
-@pytest.fixture(scope='module', autouse=True)
+@pytest.fixture(autouse=True)
 def cleanup():
     yield
+    _cleanup_annotation()
     _cleanup_dirs_ut()
+
+
+def _cleanup_annotation():
+    if ANNOTATION_PATH.exists():
+        ANNOTATION_PATH.unlink()
 
 
 def _cleanup_dirs_ut():
@@ -115,7 +120,7 @@ def _cleanup_dirs_ut():
 
 
 def _create_file(path: Path):
-    with open(path, 'w') as f:
+    with open(path, 'w', encoding='utf-8') as f:
         f.write('test')
 
 
