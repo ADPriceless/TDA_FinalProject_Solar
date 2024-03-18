@@ -12,6 +12,8 @@ from utils.make_annotation_file import create_annotation_files_hou
 def make_hou_loader(
     ds_root: Path,
     exclude_dirs: list[Path] = None,
+    img_transform = None,
+    mask_transform = None,
     params: dict = None
 ) -> DataLoader:
     """
@@ -28,7 +30,12 @@ def make_hou_loader(
     _check_types(ds_root, exclude_dirs, params)
     annotation_file = ds_root.joinpath('annotation.csv')
     create_annotation_files_hou(annotation_file, ds_root, exclude_dirs)
-    dataset = ImgAndMaskDataset(annotation_file, ds_root)
+    dataset = ImgAndMaskDataset(
+        annotation_file,
+        ds_root,
+        transform=img_transform,
+        target_transform=mask_transform
+    )
     if params is not None:
         return DataLoader(dataset, **params)
     return DataLoader(dataset)
