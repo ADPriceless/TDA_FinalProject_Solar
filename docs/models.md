@@ -18,6 +18,7 @@
     - ResNet-50 which is a popular CNN architecture \[[3](#sources)\]
     - MobileNet
   - Or they may be loaded via Hugging Face's `timm` module \[[4](#sources)\]
+- The ResNet model is a [fully connected CNN](#fully-connected-cnn), whose structure is similar to the encoder part of a U-net, but with another CNN as the decoder for pixel-wise classification (i.e. shape is [n_classes, input_width, input_height]) \[[8](#sources)\]
 
 #### Data Preparation
 - The custom dataset `__getitem__` method should return \[[7](#sources)\]:
@@ -36,15 +37,10 @@
   - `masks`: torchvision.tv_tensors.Mask of shape [2, H, W]
 
 #### How to Fine-Tune Pretrained Models
-- Use the whole model and fine tune
-  - Load the data in a format that the model can use
-  - Load the pre-trained weights
-  - Freeze the model's weights (i.e. no training)
-  - Use a custom head on the output to train
 - Use the frozen encoder and create a custom decoder
   - Similar to the above, but with a custom trainable decoder which must have the cross-connections to the encoder blocks
   - This sounds more awkward to implement, and would require more training
-- OR train from scratch?
+- OR make one from scratch?
   - May take too long and produce worse results
 
 ### Optimiser
@@ -59,6 +55,30 @@
 - Pixelwise accuracy \[[2](#sources)\]
 ---
 
+## ResNet
+### Implementing ResNet
+#### Architecure
+- ResNet consists of convolution blocks which have skip-connections between them \[[9](#sources)\]
+- Similar to U-net encoder, it decreases spacial resolution while increasing number of feature channels
+- It uses a CNN as the classifier head which has n_channels = n_classes (21 for the dataset trained on) \[[8](#sources)\]
+- Finally, an upsampler scales the spacial resolution up to the size of the input image
+
+#### How to Fine-Tune Pretrained ResNet
+- Use the model with a custom classification head
+  - Load the data in a format that the model can use
+  - Load the pre-trained weights
+  - From exploring the model with TensorBoard, the FCN consists of a backbone, two classifier heads and an upsampler.
+    - The backbone's weights may be kept constant
+    - The classifier head may be replaced with a custom one which outputs: [batch_size x n_channels x height x width], where n_channels = n_classes = 2
+    - Replace the uplampler with one that would output a 256 x 256 image
+![alt text](images/ResNet-50_annotated.png)
+  - Freeze the model's weights (i.e. no training)
+  - Use a custom head on the output to train with dimensions [2, image_height, image_width] (PyTorch tensor format is [n_classes, h, w])
+
+### Optimiser
+- Use Adam by default, since (from experience) it often leads to better results than SGD or batch gradient descent
+- Paper uses SGD + Momentum \[[8](#sources)\]
+
 ## Sources
 1. “Image segmentation | TensorFlow Core,” TensorFlow. https://www.tensorflow.org/tutorials/images/segmentation
 2. “Models and pre-trained weights — Torchvision main documentation,” pytorch.org. https://pytorch.org/vision/master/models.html
@@ -67,6 +87,8 @@
 5. “U-Net Architecture Explained,” GeeksforGeeks, Jun. 08, 2023. https://www.geeksforgeeks.org/u-net-architecture-explained/
 6. D. N. R, “U-Net Demystified: A Gentle Introduction,” Medium, Oct. 09, 2023. https://medium.com/@deepaknr015/u-net-demystified-a-gentle-introduction-2c96778126d2.
 7. “TorchVision Object Detection Finetuning Tutorial — PyTorch Tutorials 1.5.0 documentation,” pytorch.org. https://pytorch.org/tutorials/intermediate/torchvision_tutorial.html
-8. G. Kasmi et al., “A crowdsourced dataset of aerial images with annotated solar photovoltaic arrays and installation metadata,” Scientific Data, vol. 10, no. 1, Jan. 2023, doi: https://doi.org/10.1038/s41597-023-01951-4
-9. M. Kleebauer, C. Marz, C. Reudenbach, and M. Braun, “Multi-Resolution Segmentation of Solar Photovoltaic Systems Using Deep Learning,” Remote Sensing, vol. 15, no. 24, p. 5687, Jan. 2023, doi: https://doi.org/10.3390/rs15245687
-10. H. Jiang et al., “Multi-resolution dataset for photovoltaic panel segmentation from satellite and aerial imagery,” Earth System Science Data, vol. 13, no. 11, pp. 5389–5401, Nov. 2021, doi: https://doi.org/10.5194/essd-13-5389-2021
+8. J. Long, E. Shelhamer, and T. Darrell, “Fully Convolutional Networks for Semantic Segmentation,” 2015. Available: https://arxiv.org/pdf/1411.4038.pdf
+9. P. Ruiz, “Understanding and visualizing ResNets,” Medium, Oct. 08, 2018. https://towardsdatascience.com/understanding-and-visualizing-resnets-442284831be8
+10. G. Kasmi et al., “A crowdsourced dataset of aerial images with annotated solar photovoltaic arrays and installation metadata,” Scientific Data, vol. 10, no. 1, Jan. 2023, doi: https://doi.org/10.1038/s41597-023-01951-4
+11. M. Kleebauer, C. Marz, C. Reudenbach, and M. Braun, “Multi-Resolution Segmentation of Solar Photovoltaic Systems Using Deep Learning,” Remote Sensing, vol. 15, no. 24, p. 5687, Jan. 2023, doi: https://doi.org/10.3390/rs15245687
+12. H. Jiang et al., “Multi-resolution dataset for photovoltaic panel segmentation from satellite and aerial imagery,” Earth System Science Data, vol. 13, no. 11, pp. 5389–5401, Nov. 2021, doi: https://doi.org/10.5194/essd-13-5389-2021
