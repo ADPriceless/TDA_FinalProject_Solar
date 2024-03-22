@@ -7,7 +7,7 @@ from pathlib import Path
 import torchvision.transforms as tvt
 
 from preprocess.loaders import make_hou_loader
-from preprocess.transforms import scale_pixels, binarise_mask
+from preprocess.transforms import scale_pixels, binarise_mask, one_hot
 
 
 HOU_CROPLAND_DIR = Path('data/Hou/PV03_Ground_Cropland')
@@ -84,3 +84,26 @@ def test_composed_transforms():
         # Pixel values in `mask` where there are no solar
         # panels must be zero.
         assert mask.min() == 0
+
+
+def test_one_hot():
+    mask_size = 128
+    params = {
+        'batch_size': 32,
+        'drop_last': True,
+    }
+    mask_transform = tvt.Compose([
+        tvt.Resize((mask_size, mask_size)),
+        tvt.Lambda(one_hot),
+    ])
+    hou_ds = make_hou_loader(
+        HOU_CROPLAND_DIR,
+        mask_transform=mask_transform,
+        params=params
+    )
+    for _, mask in hou_ds:
+        assert mask.shape == (params['batch_size'], 2, mask_size, mask_size)
+        # Assert that mask class 0 is the opposite of mask class 1
+        # so the sum of the mask is equal to the number of pixels
+        # multiplied by the batch size.
+        assert mask.sum() == params['batch_size'] * mask_size * mask_size
