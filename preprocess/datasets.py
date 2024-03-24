@@ -8,9 +8,26 @@ import pandas as pd
 from torch.utils.data import Dataset
 from torchvision.io import read_image
 
+from utils.make_annotation_file import create_annotation_files_hou
+
+
+def make_hou_dataset(
+    exclude_dirs: list[Path],
+    img_transforms=None,
+    mask_transforms=None
+) -> Dataset:
+    """Make a dataset class for the Hou dataset."""
+    hou_root = Path('data/hou')
+    if not hou_root.exists():
+        raise ValueError(f'hou_root does not exist: {hou_root}')
+    annotaion_file = hou_root.joinpath('annotation.csv')
+    create_annotation_files_hou(annotaion_file, hou_root, exclude_dirs)
+    return ImgAndMaskDataset(annotaion_file, hou_root, img_transforms, mask_transforms)
+
 
 class ImgAndMaskDataset(Dataset):
-    """Class representing the Hou dataset. """
+    """Class representing a dataset containing images and masks
+    for segmentation tasks."""
     def __init__(
         self,
         annotations_file: Path,

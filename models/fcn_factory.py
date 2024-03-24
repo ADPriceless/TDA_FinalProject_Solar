@@ -20,8 +20,8 @@ class FcnFactory:
         """Creates an FCN model specified by `name`, where `name` can be:
         `resnet50`."""
         if name.lower() == 'resnet50':
-            self.weights = FCN_ResNet50_Weights
-            self.backbone = fcn_resnet50(weights=self.weights.DEFAULT).backbone
+            self.weights = FCN_ResNet50_Weights.DEFAULT
+            self.backbone = fcn_resnet50(weights=self.weights).backbone
             self.classifier = self._resnet50_classifier()
         else:
             raise NotImplementedError(f'FCN model {name} not implemented')
@@ -41,7 +41,8 @@ class FcnFactory:
         for param in self.backbone.parameters():
             param.requires_grad = False
 
-    def get_input_transforms(self):
+    @property
+    def input_transforms(self):
         """Returns the input transforms for the model that was 
         last created."""
-        return self.weights.transforms
+        return self.weights.transforms()
