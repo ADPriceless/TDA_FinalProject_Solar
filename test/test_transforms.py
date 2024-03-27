@@ -4,10 +4,13 @@
 
 from pathlib import Path
 
+import pytest
+from torch.utils.data import DataLoader
 import torchvision.transforms as tvt
 
+from preprocess.datasets import make_kasmi_ign_dataset
 from preprocess.loaders import make_hou_loader
-from preprocess.transforms import scale_pixels, binarise_mask, one_hot
+from preprocess.transforms import scale_pixels, binarise_mask, one_hot, rgba_to_rgb
 
 
 HOU_CROPLAND_DIR = Path('data/Hou/PV03_Ground_Cropland')
@@ -24,6 +27,7 @@ def test_resize_image():
         assert mask.shape == (1, 1, 126, 126)
 
 
+@pytest.mark.skip(reason='Function not used')
 def test_scale_img_pixel_values():
     hou_ds = make_hou_loader(
         HOU_CROPLAND_DIR,
@@ -39,6 +43,7 @@ def test_scale_img_pixel_values():
     assert count > 0 # check that there are values between 0 and 1
 
 
+@pytest.mark.skip(reason='Function obsolete due to `one_hot`')
 def test_binarise_mask():
     hou_ds = make_hou_loader(
         HOU_CROPLAND_DIR,
@@ -107,3 +112,11 @@ def test_one_hot():
         # so the sum of the mask is equal to the number of pixels
         # multiplied by the batch size.
         assert mask.sum() == params['batch_size'] * mask_size * mask_size
+
+
+def test_rgba_to_rgb():
+    transform = tvt.Lambda(rgba_to_rgb)
+    ign_ds = make_kasmi_ign_dataset(img_transforms=transform)
+    loader = DataLoader(ign_ds)
+    for img, _ in loader:
+        assert img.shape == (1, 3, 400, 400)
