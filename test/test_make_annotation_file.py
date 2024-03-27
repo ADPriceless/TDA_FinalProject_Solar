@@ -24,12 +24,12 @@ from utils.make_annotation_file import (
 
 # ---------------------------------------------------------------------------
 # Tests
-@pytest.mark.skip
+
 def test_get_img_and_mask_filepaths_returns_pair():
     gen = HOU_BRICK_DIR.glob('**/*.png')
     assert len(get_img_and_mask_filepaths(gen)) == 2
 
-@pytest.mark.skip
+
 def test_get_img_and_mask_filepaths_label_always_second():
     gen = HOU_BRICK_DIR.glob('**/*.png')
     # using `for` instead of `while` to avoid risk of infinite loop
@@ -43,7 +43,7 @@ def test_get_img_and_mask_filepaths_label_always_second():
     else:
         assert False # if here, code did not break out of `for` loop
 
-@pytest.mark.skip
+
 def test_path_excluded():
     split_idx = 3
     exclude_dirs = DIRS_UNDER_TEST[:split_idx]
@@ -56,7 +56,7 @@ def test_path_excluded():
         for file in DIRS_UNDER_TEST[i].iterdir():
             assert not path_excluded(file, exclude_dirs)
 
-@pytest.mark.skip
+
 def test_write_path_of_img_and_mask_to_csv():
     gen = HOU_BRICK_DIR.glob('**/*.png')
     # using `for` instead of `while` to avoid risk of infinite loop
@@ -71,14 +71,14 @@ def test_write_path_of_img_and_mask_to_csv():
     for line in read_csv(ANNOTATION_PATH):
         _annotation_general_checks(line)
 
-@pytest.mark.skip
+
 def test_create_annotation_files_hou_does_not_overwrite_existing():
     with open(ANNOTATION_PATH, 'w', encoding='utf-8'):
         pass
     create_annotation_files_hou(ANNOTATION_PATH, HOU_BRICK_DIR)
     assert len(read_csv(ANNOTATION_PATH)) == 0
 
-@pytest.mark.skip
+
 def test_create_annotation_files_hou_ds_subset():
     create_annotation_files_hou(ANNOTATION_PATH, HOU_BRICK_DIR)
     for line in read_csv(ANNOTATION_PATH):
@@ -88,7 +88,7 @@ def test_create_annotation_files_hou_ds_subset():
         assert len(Path(line[0]).parts) == 1
         assert len(Path(line[1]).parts) == 1
 
-@pytest.mark.skip
+
 def test_create_annotation_files_hou_whole_ds():
     create_annotation_files_hou(ANNOTATION_PATH, ROOT_HOU)
     for line in read_csv(ANNOTATION_PATH):
