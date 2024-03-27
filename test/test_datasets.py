@@ -19,7 +19,7 @@ import pytest
 from global_variables import (
     ANNOTATION_PATH, DIRS_UNDER_TEST, DS_SUBSET_LENGTHS, HOU_BRICK_DIR
 )
-from preprocess.datasets import ImgAndMaskDataset
+from preprocess.datasets import ImgAndMaskDataset, make_kasmi_ign_dataset
 from utils.make_annotation_file import create_annotation_files_hou
 
 
@@ -79,6 +79,18 @@ def test_ds_raises_if_annotation_file_not_csv():
     with pytest.raises(ValueError):
         ImgAndMaskDataset(HOU_BRICK_DIR, annotation_file)
     _cleanup_txt_files()
+
+
+def test_make_kasmi_ign_dataset():
+    ign_ds = make_kasmi_ign_dataset()
+    assert isinstance(ign_ds, ImgAndMaskDataset)
+
+
+@pytest.mark.skip(reason='Takes too long to run')
+def test_ign_ds_loads_img_mask_pair():
+    ign_ds = make_kasmi_ign_dataset()
+    for sample in range(len(ign_ds)):
+        assert len(ign_ds[sample]) == 2
 
 
 # ---------------------------------------------------------------------------

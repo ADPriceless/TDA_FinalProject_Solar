@@ -8,7 +8,7 @@ import pandas as pd
 from torch.utils.data import Dataset
 from torchvision.io import read_image
 
-from utils.make_annotation_file import create_annotation_files_hou
+from utils.make_annotation_file import create_annotation_files_hou, create_annotation_file_kasmi
 
 
 def make_hou_dataset(
@@ -22,7 +22,15 @@ def make_hou_dataset(
         raise ValueError(f'hou_root does not exist: {hou_root}')
     annotaion_file = hou_root.joinpath('annotation.csv')
     create_annotation_files_hou(annotaion_file, hou_root, exclude_dirs)
-    return ImgAndMaskDataset(annotaion_file, hou_root, img_transforms, mask_transforms)
+    return ImgAndMaskDataset(annotaion_file, img_transforms, mask_transforms)
+
+
+def make_kasmi_ign_dataset(img_transforms=None, mask_transforms=None) -> Dataset:
+    """Make a dataset class for the Kasmi ign dataset."""
+    ign_root = Path('data/kasmi/bdappv/ign')
+    annotation_path = ign_root.joinpath('annotation.csv')
+    create_annotation_file_kasmi(annotation_path, ign_root)
+    return ImgAndMaskDataset(annotation_path, ign_root, img_transforms, mask_transforms)
 
 
 class ImgAndMaskDataset(Dataset):
@@ -33,7 +41,7 @@ class ImgAndMaskDataset(Dataset):
         annotations_file: Path,
         img_dir: Path,
         transform=None,
-        target_transform=None
+        target_transform=None,
     ):
         if img_dir.is_file():
             raise ValueError(f'img_dir must be a directory, not a file: {img_dir}')
@@ -46,10 +54,10 @@ class ImgAndMaskDataset(Dataset):
         return self.df_img_mask.shape[0]
 
     def __getitem__(self, idx):
-        img_path = self.img_dir.joinpath(self.df_img_mask.loc[idx, 'img'])
-        mask_path = self.img_dir.joinpath(self.df_img_mask.loc[idx,'mask'])
-        image = read_image(str(img_path))
-        mask = read_image(str(mask_path))
+        img_path = self.df_img_mask.loc[idx, 'img']
+        mask_path = self.df_img_mask.loc[idx,'mask']
+        image = read_image(img_path)
+        mask = read_image(mask_path)
         if self.transform:
             image = self.transform(image)
         if self.target_transform:
