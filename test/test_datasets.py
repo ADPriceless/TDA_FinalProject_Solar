@@ -86,11 +86,20 @@ def test_make_kasmi_ign_dataset():
     assert isinstance(ign_ds, ImgAndMaskDataset)
 
 
-@pytest.mark.skip(reason='Takes too long to run')
-def test_ign_ds_loads_img_mask_pair():
+def test_ign_ds_samples():
+    blank_mask_shape = (1, 520, 520)
     ign_ds = make_kasmi_ign_dataset()
     for sample in range(len(ign_ds)):
         assert len(ign_ds[sample]) == 2
+        img, mask = ign_ds[sample]
+        assert img.shape in ((3, 400, 400), (4, 400, 400))
+        assert img.max() <= 255
+        assert img.min() >= 0
+        assert mask.shape in ((1, 400, 400), blank_mask_shape)
+        assert mask.max() <= 255
+        assert mask.min() == 0
+        assert len(mask.unique()) in (1, 2)
+
 
 
 # ---------------------------------------------------------------------------
