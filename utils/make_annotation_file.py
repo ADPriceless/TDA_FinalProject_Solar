@@ -26,11 +26,8 @@ def create_annotation_files_hou(
                     path_excluded(mask_filepath, exclude_dirs),
                 )):
                     continue
-            img_filepath.relative_to(root_dir)
             write_path_of_img_and_mask_to_csv(
-                img_filepath.relative_to(root_dir),
-                mask_filepath.relative_to(root_dir),
-                annotation_path
+                img_filepath, mask_filepath, annotation_path
             )
         except StopIteration:
             break
@@ -61,12 +58,12 @@ def write_path_of_img_and_mask_to_csv(
         writer.writerow([img_filepath, mask_filepath])
 
 
-def create_annotation_file_kasmi(img_root: Path, mask_root: Path, csv_path: Path) -> None:
+def create_annotation_file_kasmi(csv_path: Path, root_dir: Path) -> None:
     """Writes the images and their masks to a CSV file"""
     _new_annotation_file(csv_path)
     blank_mask_path = Path('data/Kasmi/bdappv/blank_mask.png')
-    img_gen = img_root.glob('*.png')
-    mask_gen = mask_root.glob('*.png')
+    img_gen = root_dir.glob('img/*.png')
+    mask_gen = root_dir.glob('mask/*.png')
     # For each mask, there is an image. But for images without solar
     # panels, there is no mask.
     # So, loop through masks and try to match them to an image. If
