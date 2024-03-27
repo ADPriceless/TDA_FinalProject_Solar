@@ -59,3 +59,33 @@ def write_path_of_img_and_mask_to_csv(
     with open(csv_filepath, 'a', newline='', encoding='utf-8') as csv_file:
         writer = csv.writer(csv_file)
         writer.writerow([img_filepath, mask_filepath])
+
+
+def create_annotation_file_kasmi(img_root: Path, mask_root: Path, csv_path: Path) -> None:
+    """Writes the images and their masks to a CSV file"""
+    _new_annotation_file(csv_path)
+    blank_mask_path = Path('data/Kasmi/bdappv/blank_mask.png')
+    img_gen = img_root.glob('*.png')
+    mask_gen = mask_root.glob('*.png')
+    # For each mask, there is an image. But for images without solar
+    # panels, there is no mask.
+    # So, loop through masks and try to match them to an image. If
+    # the image doesn't match, pair it with the blank mask.
+    # Once the masks have run out, any images that are leftover are
+    # not included in the annotation file.
+    img_path = next(img_gen) # get the first image
+    while True:
+        try:
+            mask_path = next(mask_gen)
+            while img_path.name != mask_path.name:
+                write_path_of_img_and_mask_to_csv(img_path, blank_mask_path, csv_path)
+                img_path = next(img_gen)
+            write_path_of_img_and_mask_to_csv(img_path, mask_path, csv_path)
+            img_path = next(img_gen)
+        except StopIteration:
+            break # Ran out of masks
+
+
+def _new_annotation_file(csv_path: Path) -> None:
+    with open(csv_path, 'w', newline='', encoding='utf-8'):
+        pass # CSV is empty
