@@ -3,6 +3,7 @@ Allows user to upload an image and a mask, then makes a prediction,
 compares it to the mask and calculates the IoU"""
 
 from dataclasses import dataclass
+from typing import Optional
 
 from PIL import Image
 import streamlit as st
@@ -18,7 +19,7 @@ from preprocess.transforms import rgba_to_rgb
 @dataclass
 class ImageModel:
     """Base class to store data for an image."""
-    data: Image.Image | None
+    data: Optional[Image.Image]
     caption: str
     use_col_width: bool
 
@@ -42,7 +43,7 @@ class UploadImageModel(ImageModel):
     """A class to store data for the images that the user uploads."""
     upload_msg: str
     supported_modes: list[str]
-    supported_types: list[str] | None
+    supported_types: Optional[list[str]]
 
     def __init__(
         self, caption: str, upload_msg: str, supported_modes: list[str],
@@ -73,7 +74,7 @@ class UploadImageModel(ImageModel):
 class OverlayImageModel(ImageModel):
     """A class to store data for images where a mask is overlaid."""
     alpha: float
-    colours: list[str] | str
+    colours: list[str]
 
     def __init__(
         self, caption: str, data: Image.Image = None, use_col_width=True,
