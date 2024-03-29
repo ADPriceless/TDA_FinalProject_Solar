@@ -22,7 +22,7 @@ def make_hou_dataset(
         raise ValueError(f'hou_root does not exist: {hou_root}')
     annotaion_file = hou_root.joinpath('annotation.csv')
     create_annotation_files_hou(annotaion_file, hou_root, exclude_dirs)
-    return ImgAndMaskDataset(annotaion_file, img_transforms, mask_transforms)
+    return ImgAndMaskDataset(annotaion_file, hou_root, img_transforms, mask_transforms)
 
 
 def make_kasmi_ign_dataset(img_transforms=None, mask_transforms=None) -> Dataset:
