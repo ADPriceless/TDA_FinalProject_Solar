@@ -6,6 +6,7 @@ COPY ./preprocess/transforms.py /solar/preprocess/transforms.py
 COPY ./models /solar/models
 COPY ./saved_models/model_20240328_074804_4 /solar/saved_models/model_20240328_074804_4
 COPY ./app.py /solar/app.py
+COPY ./requirements.txt /solar/requirements.txt
 
 RUN pip install -r requirements.txt
 
