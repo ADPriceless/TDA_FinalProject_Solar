@@ -4,13 +4,12 @@
 
 from pathlib import Path
 
-import pytest
 from torch.utils.data import DataLoader
-import torchvision.transforms as tvt
+import torchvision.transforms.v2 as tvt
 
 from preprocess.datasets import make_kasmi_ign_dataset
 from preprocess.loaders import make_hou_loader
-from preprocess.transforms import scale_pixels, binarise_mask, one_hot, rgba_to_rgb
+from preprocess.transforms import one_hot, rgba_to_rgb
 
 
 HOU_CROPLAND_DIR = Path('data/Hou/PV03_Ground_Cropland')
@@ -25,70 +24,8 @@ def test_resize_image():
     for img, mask in hou_ds:
         assert img.shape == (1, 3, 256, 256)
         assert mask.shape == (1, 1, 126, 126)
-
-
-@pytest.mark.skip(reason='Function not used')
-def test_scale_img_pixel_values():
-    hou_ds = make_hou_loader(
-        HOU_CROPLAND_DIR,
-        img_transform=tvt.Lambda(scale_pixels),
-    )
-    count = 0
-    for img, _ in hou_ds:
-        assert img.shape == (1, 3, 1024, 1024)
-        assert img.max() <= 1
-        assert img.type() == 'torch.FloatTensor'
-        if 0 < img[0, 0, 0, 0] < 1:
-            count += 1
-    assert count > 0 # check that there are values between 0 and 1
-
-
-@pytest.mark.skip(reason='Function obsolete due to `one_hot`')
-def test_binarise_mask():
-    hou_ds = make_hou_loader(
-        HOU_CROPLAND_DIR,
-        mask_transform=tvt.Lambda(binarise_mask),
-    )
-    count = 0
-    for _, mask in hou_ds:
-        n_unique = len(mask.unique())
-        if n_unique == 2:
-            count += 1
-        assert n_unique in (1, 2)
-        # Pixel values in `mask` where there are solar
-        # panels must be one.
-        if n_unique == 2:
-            assert mask.max() == 1
-        # Pixel values in `mask` where there are no solar
-        # panels must be zero.
-        assert mask.min() == 0
-    assert count > 0 # check that there are outputs with two unique values
-
-
-def test_composed_transforms():
-    img_transform = tvt.Compose([tvt.Resize((256, 256)), tvt.Lambda(scale_pixels)])
-    mask_transform = tvt.Compose([tvt.Resize((256, 256)), tvt.Lambda(binarise_mask)])
-    hou_ds = make_hou_loader(
-        HOU_CROPLAND_DIR,
-        img_transform=img_transform,
-        mask_transform=mask_transform
-    )
-    for img, mask in hou_ds:
-        assert img.shape == (1, 3, 256, 256)
-        assert img.max() <= 1
-
-        assert mask.shape == (1, 1, 256, 256)
-        n_unique = len(mask.unique())
-        # if n_unique == 2:
-        #     count += 1
-        assert n_unique in (1, 2)
-         # Pixel values in `mask` where there are solar
-        # panels must be one.
-        if n_unique == 2:
-            assert mask.max() == 1
-        # Pixel values in `mask` where there are no solar
-        # panels must be zero.
-        assert mask.min() == 0
+        assert img.type() == 'torch.ByteTensor'
+        assert mask.type() == 'torch.ByteTensor'
 
 
 def test_one_hot():
@@ -112,6 +49,7 @@ def test_one_hot():
         # so the sum of the mask is equal to the number of pixels
         # multiplied by the batch size.
         assert mask.sum() == params['batch_size'] * mask_size * mask_size
+        assert mask.type() == 'torch.FloatTensor'
 
 
 def test_rgba_to_rgb():
@@ -120,3 +58,31 @@ def test_rgba_to_rgb():
     loader = DataLoader(ign_ds)
     for img, _ in loader:
         assert img.shape == (1, 3, 400, 400)
+        assert img.type() == 'torch.ByteTensor'
+
+
+def test_composed_transforms():
+    img_transform = tvt.Compose([tvt.Resize((256, 256))])
+    mask_transform = tvt.Compose([tvt.Resize((256, 256)), tvt.Lambda(one_hot)])
+    hou_ds = make_hou_loader(
+        HOU_CROPLAND_DIR,
+        img_transform=img_transform,
+        mask_transform=mask_transform
+    )
+    for img, mask in hou_ds:
+        assert img.shape == (1, 3, 256, 256)
+        assert mask.shape == (1, 2, 256, 256)
+        n_unique = len(mask.unique())
+        assert n_unique == 2
+         # Pixel values in `mask` where there are solar
+        # panels must be one.
+        assert mask.max() == 1
+        # Pixel values in `mask` where there are no solar
+        # panels must be zero.
+        assert mask.min() == 0
+        # Test type:
+        # - The image should be uint8 or ByteTenor for efficiency.
+        # - The mask must be a float for the loss calculation during
+        #   training.
+        assert img.type() == 'torch.ByteTensor'
+        assert mask.type() == 'torch.FloatTensor'
