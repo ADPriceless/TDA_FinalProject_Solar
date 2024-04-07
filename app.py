@@ -255,7 +255,9 @@ class ClfController:
 
     def _format_prediction(self) -> None:
         """Format the prediction to be of shape [h, w] and chosen size"""
-        return resize(self.prediction, self.model.input_image.data.size)[0, 1]
+        # PIL is WxH, where as torch is HxW
+        to_size = self.model.input_image.data.size[1], self.model.input_image.data.size[0]
+        return resize(self.prediction, to_size)[0, 1]
 
     def show_mask(self):
         """Show the mask overlaid on the input image."""
