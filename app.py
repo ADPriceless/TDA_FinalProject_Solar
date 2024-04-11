@@ -220,7 +220,9 @@ class ClfController:
     def _load_solar_clf(self) -> None:
         self.factory = FcnFactory(n_classes=2)
         loaded_clf = self.factory.make_fcn('resnet50')
-        loaded_clf.load_state_dict(torch.load(self.model.solar_clf_path))
+        loaded_clf.load_state_dict(torch.load(
+            self.model.solar_clf_path, map_location=torch.device('cpu')
+        ))
         loaded_clf.eval()
         self.classifier = loaded_clf
 
