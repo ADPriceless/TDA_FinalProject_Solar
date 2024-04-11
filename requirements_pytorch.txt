@@ -1,0 +1,13 @@
+# A separate requirements file for PyTorch modules because,
+# by default, the GPU versions are installed (along with the
+# CUDA libraries). Only the CPU version is needed for the server.
+
+# So, to create a container without the CUDA libraries, this file
+# must be used with the command:
+# `pip3 install -r ./requirements_pytorch.txt --index-url https://download.pytorch.org/whl/cpu`.
+
+# Since the `--index-url` option, applies globally to command above,
+# this file must be kept separate from other modules such that pip does not
+# check the PyTorch repository for those other requirements.
+torch==2.2.0
+torchvision==0.17.0
