@@ -49,15 +49,17 @@ class ImgAndMaskDataset(Dataset):
         self.img_dir = img_dir
         self.transform = transform
         self.target_transform = target_transform
+        self.img_path = None
+        self.mask_path = None
 
     def __len__(self):
         return self.df_img_mask.shape[0]
 
     def __getitem__(self, idx):
-        img_path = self.df_img_mask.loc[idx, 'img']
-        mask_path = self.df_img_mask.loc[idx,'mask']
-        image = read_image(img_path)
-        mask = read_image(mask_path)
+        self.img_path = self.df_img_mask.loc[idx, 'img']
+        self.mask_path = self.df_img_mask.loc[idx,'mask']
+        image = read_image(self.img_path)
+        mask = read_image(self.mask_path)
         if self.transform:
             image = self.transform(image)
         if self.target_transform:
