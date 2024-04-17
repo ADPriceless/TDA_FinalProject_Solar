@@ -14,7 +14,7 @@ def initialise_state():
     """Initialises the state for the app. Edit values to alter app properties."""
     initial_state = {
         'title': 'Solar Panel Segmentation',
-        'test_ds_path': Path('data\\test_ds'),
+        'test_ds_path': Path('app_resources\\test_ds'),
         'num_samples': 465,
         'sample_idx': 0,
         'img_path': None,
@@ -23,7 +23,7 @@ def initialise_state():
         'overlay_alpha': 0.3,
         'overlay_opts': ['None', 'True Mask', 'Prediction', 'IoU'],
         'overlay': 'None',
-        'clf_path': 'saved_models/model_20240328_074804_4',
+        'clf_path': 'app_resources\\pretrained_models\\pretrained_solar_panel_clf.pt',
         'default_clf_threshold': 50,
         'prediction_valid': False,
         'iou': 0.0,
