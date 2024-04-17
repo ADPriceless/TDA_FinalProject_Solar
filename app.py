@@ -7,6 +7,7 @@ Displays a single image from a test dataset with options to:
 
 
 import random
+from typing import Union
 
 from PIL import Image
 import streamlit as st
@@ -48,7 +49,7 @@ def _load_img_mask_paths():
         files[st.session_state.sample_idx:st.session_state.sample_idx+2]
 
 
-def _open_image(astype: str = 'image') -> Tensor | Image.Image:
+def _open_image(astype: str = 'image') -> Union[Tensor, Image.Image]:
     img = Image.open(st.session_state.img_path)
     if astype == 'image':
         return img
