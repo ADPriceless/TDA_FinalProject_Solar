@@ -13,6 +13,9 @@ from preprocess.transforms import rgba_to_rgb
 
 def initialise_state():
     """Initialises the state for the app. Edit values to alter app properties."""
+    if 'title' not in st.session_state:
+        # use any field to only log once
+        logging.info('Initialise state dict')
     initial_state = {
         'title': 'Solar Panel Segmentation',
         'test_ds_path': Path('app_resources\\test_ds'),
@@ -65,6 +68,7 @@ def initialise_state():
         }
     factory = FcnFactory(n_classes=2)
     if 'classifier' not in st.session_state:
+        logging.info('Load classifer')
         st.session_state.classifier = load_clf_from(factory)
     if 'in_transforms' not in st.session_state:
         st.session_state.in_transforms = load_input_transforms_from(factory)
@@ -72,8 +76,11 @@ def initialise_state():
 
 def load_clf_from(factory: FcnFactory) -> torch.nn.Module:
     """Load pretrained classifier from factory."""
+    logging.debug('Load pretrained clf backbone from PyTorch')
     loaded_clf = factory.make_fcn('resnet50')
-    logging.debug('clf_path: %s', st.session_state.clf_path)
+    logging.debug(
+        'Load pretrained clf head from clf_path: %s', st.session_state.clf_path
+    )
     loaded_clf.load_state_dict(torch.load(
         st.session_state.clf_path,
         map_location=torch.device('cpu')

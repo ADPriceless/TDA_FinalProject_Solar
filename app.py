@@ -7,7 +7,9 @@ Displays a single image from a test dataset with options to:
 
 
 import logging
+from pathlib import Path
 import random
+import sys
 from typing import Union
 
 from PIL import Image
@@ -167,6 +169,22 @@ def main():
         st.write(description())
 
 
+def log_resources():
+    """Log files in app_resources dir, but count the images"""
+    image_count = 0
+    logging.debug('Directories:')
+    for file in Path('app_resources').glob('**/*'):
+        if file.suffix == '.png':
+            image_count += 1
+        else:
+            logging.debug(file)
+    logging.debug('Image count: %d', image_count)
+
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
+    # Using these logs to probe project directory and
+    # config before running the app itself.
+    logging.debug('Python version: %s', sys.version)
+    log_resources()
     main()
