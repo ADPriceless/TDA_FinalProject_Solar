@@ -182,6 +182,9 @@ def log_resources():
 
 
 if __name__ == "__main__":
+    # check secrets.toml works
+    if 'verify_this_exists' not in st.secrets:
+        raise RuntimeError('secrets.toml not updated!')
     logging.basicConfig(level=logging.DEBUG)
     # Using these logs to probe project directory and
     # config before running the app itself.
