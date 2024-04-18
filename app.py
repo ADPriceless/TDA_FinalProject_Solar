@@ -6,6 +6,7 @@ Displays a single image from a test dataset with options to:
 """
 
 
+import logging
 import random
 from typing import Union
 
@@ -167,4 +168,5 @@ def main():
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     main()

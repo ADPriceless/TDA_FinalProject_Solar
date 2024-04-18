@@ -1,5 +1,6 @@
 """Functions to initialise the state of the app."""
 
+import logging
 from pathlib import Path
 
 import streamlit as st
@@ -72,6 +73,7 @@ def initialise_state():
 def load_clf_from(factory: FcnFactory) -> torch.nn.Module:
     """Load pretrained classifier from factory."""
     loaded_clf = factory.make_fcn('resnet50')
+    logging.debug('clf_path: %s', st.session_state.clf_path)
     loaded_clf.load_state_dict(torch.load(
         st.session_state.clf_path,
         map_location=torch.device('cpu')
