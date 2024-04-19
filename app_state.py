@@ -18,7 +18,7 @@ def initialise_state():
         logging.info('Initialise state dict')
     initial_state = {
         'title': 'Solar Panel Segmentation',
-        'test_ds_path': Path('app_resources\\test_ds'),
+        'test_ds_path': Path('app_resources/test_ds'),
         'num_samples': 465,
         'sample_idx': 0,
         'img_path': None,
@@ -27,7 +27,7 @@ def initialise_state():
         'overlay_alpha': 0.3,
         'overlay_opts': ['None', 'True Mask', 'Prediction', 'IoU'],
         'overlay': 'None',
-        'clf_path': Path('app_resources\\pretrained_models\\pretrained_solar_panel_clf.pt'),
+        'clf_path': Path('app_resources/pretrained_models/pretrained_solar_panel_clf.pt'),
         'default_clf_threshold': 50,
         'prediction_valid': False,
         'iou': 0.0,
