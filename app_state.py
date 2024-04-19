@@ -1,6 +1,5 @@
 """Functions to initialise the state of the app."""
 
-import logging
 from pathlib import Path
 
 import streamlit as st
@@ -13,9 +12,6 @@ from preprocess.transforms import rgba_to_rgb
 
 def initialise_state():
     """Initialises the state for the app. Edit values to alter app properties."""
-    if 'title' not in st.session_state:
-        # use any field to only log once
-        logging.info('Initialise state dict')
     initial_state = {
         'title': 'Solar Panel Segmentation',
         'test_ds_path': Path('app_resources/test_ds'),
@@ -68,11 +64,6 @@ def initialise_state():
         }
     factory = FcnFactory(n_classes=2)
     if 'classifier' not in st.session_state:
-        logging.info('Load classifer')
-        clf_path: Path = st.session_state.clf_path
-        logging.debug('clf_path absolute: %s', clf_path.absolute())
-        logging.debug('clf_path relative: %s', clf_path)
-        logging.debug('clf_path exists: %r', clf_path.exists())
         st.session_state.classifier = load_clf_from(factory)
     if 'in_transforms' not in st.session_state:
         st.session_state.in_transforms = load_input_transforms_from(factory)
