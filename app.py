@@ -48,8 +48,13 @@ def load_sample_image() -> Image.Image:
 
 def _load_img_mask_paths():
     files = tuple(st.session_state.test_ds_path.glob('*.png'))
-    st.session_state.img_path, st.session_state.mask_path = \
-        files[st.session_state.sample_idx:st.session_state.sample_idx+2]
+    file = str(files[st.session_state.sample_idx])
+    if file.endswith('_label.png'):
+        st.session_state.img_path = file[:-len('_label.png')] + '.png'
+        st.session_state.mask_path = file
+    else:
+        st.session_state.img_path = file
+        st.session_state.mask_path = file[:-4] + '_label.png'
 
 
 def _open_image(astype: str = 'image') -> Union[Tensor, Image.Image]:
@@ -119,12 +124,8 @@ def _iou_score(intersection: Tensor, union: Tensor) -> None:
 
 def choose_random_img_mask_pair():
     """Select a random sample from the dataset."""
-    # One sample is an image/mask pair
-    choice = random.randint(0, 2*st.session_state.num_samples)
-    # Make even to point to the input image, not the mask
-    choice = (choice // 2) * 2
-    st.session_state.sample_idx = choice
-    st.session_state.prediction_valid = False
+    st.session_state.sample_idx = random.randint(0, (2 * st.session_state.num_samples) -1)
+    st.session_state.prediction_valid = False # reset for every new image
 
 
 def description() -> str:

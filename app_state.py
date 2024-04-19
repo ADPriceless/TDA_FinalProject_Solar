@@ -66,16 +66,16 @@ def initialise_state():
                 \n\nThe more purple there is, the more mistakes the model
                 has made.""",
         }
-    # factory = FcnFactory(n_classes=2)
+    factory = FcnFactory(n_classes=2)
     if 'classifier' not in st.session_state:
         logging.info('Load classifer')
         clf_path: Path = st.session_state.clf_path
         logging.debug('clf_path absolute: %s', clf_path.absolute())
         logging.debug('clf_path relative: %s', clf_path)
         logging.debug('clf_path exists: %r', clf_path.exists())
-        # st.session_state.classifier = load_clf_from(factory)
-    # if 'in_transforms' not in st.session_state:
-    #     st.session_state.in_transforms = load_input_transforms_from(factory)
+        st.session_state.classifier = load_clf_from(factory)
+    if 'in_transforms' not in st.session_state:
+        st.session_state.in_transforms = load_input_transforms_from(factory)
 
 
 def load_clf_from(factory: FcnFactory) -> torch.nn.Module:
